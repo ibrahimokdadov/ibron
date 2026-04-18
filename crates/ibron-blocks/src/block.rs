@@ -15,6 +15,9 @@ pub enum BlockState {
 pub struct Block {
     pub id: BlockId,
     pub prompt_row: StableRowIndex,
+    /// Column on `prompt_row` where user input starts (right after the
+    /// shell prompt). Populated by OSC 133;B.
+    pub input_column: Option<usize>,
     pub output_start: Option<StableRowIndex>,
     pub output_end: Option<StableRowIndex>,
     pub exit_status: Option<i32>,
@@ -26,6 +29,7 @@ impl Block {
         Self {
             id,
             prompt_row,
+            input_column: None,
             output_start: None,
             output_end: None,
             exit_status: None,

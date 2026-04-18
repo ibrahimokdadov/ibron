@@ -55,13 +55,31 @@ impl TermWindow {
             log::warn!("BlockCopyCommand: no block to copy");
             return;
         };
-        let end = block.output_start.unwrap_or(block.prompt_row + 1);
-        let text = extract_text(pane, block.prompt_row..end);
+        let text = extract_command_text(pane, &block);
         if text.is_empty() {
             log::warn!("BlockCopyCommand: empty command text");
             return;
         }
         self.copy_to_clipboard(ClipboardCopyDestination::Clipboard, text);
+    }
+
+    pub(crate) fn block_rerun(&self, pane: &Arc<dyn Pane>) {
+        let Some(block) = self.focused_block_snapshot(pane.pane_id()) else {
+            log::warn!("BlockRerun: no block to rerun");
+            return;
+        };
+        let text = extract_command_text(pane, &block);
+        if text.is_empty() {
+            log::warn!("BlockRerun: empty command text");
+            return;
+        }
+        if let Err(err) = pane.send_paste(&text) {
+            log::error!("BlockRerun: send_paste failed: {err:#}");
+            return;
+        }
+        if let Err(err) = pane.send_paste("\r") {
+            log::error!("BlockRerun: send_paste(CR) failed: {err:#}");
+        }
     }
 
     pub(crate) fn block_copy_output(&self, pane: &Arc<dyn Pane>) {
@@ -96,4 +114,38 @@ fn extract_text(pane: &Arc<dyn Pane>, range: std::ops::Range<StableRowIndex>) ->
         out.push_str(line.as_str().trim_end());
     }
     out
+}
+
+/// Pulls just the command the user typed from `block`, trimming the shell
+/// prompt when OSC 133;B gave us an input column. Falls back to the full
+/// prompt row(s) if no InputStart was seen.
+fn extract_command_text(pane: &Arc<dyn Pane>, block: &Block) -> String {
+    let end = block.output_start.unwrap_or(block.prompt_row + 1);
+    let text = extract_text(pane, block.prompt_row..end);
+    match block.input_column {
+        Some(col) if col > 0 => {
+            let mut lines = text.splitn(2, '\n');
+            let first = lines.next().unwrap_or("");
+            let rest = lines.next();
+            let trimmed_first = trim_first_columns(first, col);
+            match rest {
+                Some(r) => {
+                    let mut out = String::with_capacity(trimmed_first.len() + 1 + r.len());
+                    out.push_str(&trimmed_first);
+                    out.push('\n');
+                    out.push_str(r);
+                    out
+                }
+                None => trimmed_first.into_owned(),
+            }
+        }
+        _ => text,
+    }
+}
+
+fn trim_first_columns(s: &str, cols: usize) -> std::borrow::Cow<'_, str> {
+    match s.char_indices().nth(cols) {
+        Some((byte_offset, _)) => std::borrow::Cow::Borrowed(&s[byte_offset..]),
+        None => std::borrow::Cow::Borrowed(""),
+    }
 }

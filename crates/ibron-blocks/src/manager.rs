@@ -43,6 +43,13 @@ impl BlockManager {
                 self.next_id += 1;
                 self.blocks.push(Block::new(id, row));
             }
+            CommandBlockEvent::InputStart { column } => {
+                if let Some(last) = self.blocks.last_mut() {
+                    if last.input_column.is_none() {
+                        last.input_column = Some(column);
+                    }
+                }
+            }
             CommandBlockEvent::OutputStart => {
                 if let Some(last) = self.blocks.last_mut() {
                     last.output_start = Some(row);

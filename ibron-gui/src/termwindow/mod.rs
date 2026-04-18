@@ -2794,7 +2794,7 @@ impl TermWindow {
             BlockFocusNext => self.block_focus_step(pane, 1),
             BlockCopyCommand => self.block_copy_command(pane),
             BlockCopyOutput => self.block_copy_output(pane),
-            BlockRerun => log::warn!("BlockRerun is not yet implemented"),
+            BlockRerun => self.block_rerun(pane),
             BlockFold => log::warn!("BlockFold is not yet implemented"),
             BlockBookmark => log::warn!("BlockBookmark is not yet implemented"),
             BlockShare => log::warn!("BlockShare is not yet implemented"),

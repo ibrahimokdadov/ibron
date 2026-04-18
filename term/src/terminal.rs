@@ -50,6 +50,11 @@ pub enum Progress {
 pub enum CommandBlockEvent {
     /// OSC 133;A — a new prompt is about to be drawn.
     PromptStart,
+    /// OSC 133;B — the prompt ended and user-typed input starts here.
+    /// `column` is the 0-indexed column on the same row as the prompt
+    /// where user input begins; used to trim shell prompt text when
+    /// extracting the command line.
+    InputStart { column: usize },
     /// OSC 133;C — user submitted the command; output begins.
     OutputStart,
     /// OSC 133;D;<status> — the most recent command finished.

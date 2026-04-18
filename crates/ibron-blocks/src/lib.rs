@@ -74,6 +74,17 @@ mod tests {
     }
 
     #[test]
+    fn manager_records_input_column_once_per_block() {
+        let mut m = BlockManager::new();
+        m.on_event(E::PromptStart, 0);
+        m.on_event(E::InputStart { column: 2 }, 0);
+        // A second InputStart (e.g. continuation marker) should not
+        // clobber the first, which is what we want for command extraction.
+        m.on_event(E::InputStart { column: 99 }, 0);
+        assert_eq!(m.latest().unwrap().input_column, Some(2));
+    }
+
+    #[test]
     fn manager_iter_range_filters_visible_window() {
         let mut m = BlockManager::new();
         m.on_event(E::PromptStart, 10);

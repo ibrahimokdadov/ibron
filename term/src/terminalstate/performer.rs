@@ -895,12 +895,16 @@ impl<'a> Performer<'a> {
                 FinalTermSemanticPrompt::MarkEndOfPromptAndStartOfInputUntilNextMarker { .. },
             ) => {
                 self.pen.set_semantic_type(SemanticType::Input);
+                let col = self.cursor.x;
+                self.emit_block_event(CommandBlockEvent::InputStart { column: col });
             }
             OperatingSystemCommand::FinalTermSemanticPrompt(
                 FinalTermSemanticPrompt::MarkEndOfPromptAndStartOfInputUntilEndOfLine { .. },
             ) => {
                 self.pen.set_semantic_type(SemanticType::Input);
                 self.clear_semantic_attribute_on_newline = true;
+                let col = self.cursor.x;
+                self.emit_block_event(CommandBlockEvent::InputStart { column: col });
             }
             OperatingSystemCommand::FinalTermSemanticPrompt(
                 FinalTermSemanticPrompt::MarkEndOfInputAndStartOfOutput { .. },
