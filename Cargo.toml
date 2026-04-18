@@ -12,7 +12,7 @@ members = [
   "wezterm-escape-parser",
   "wezterm-dynamic",
   "ibron-gui",
-  "wezterm-mux-server",
+  "ibron-mux-server",
   "wezterm-open-url",
   "wezterm-ssh",
   "wezterm-surface",
