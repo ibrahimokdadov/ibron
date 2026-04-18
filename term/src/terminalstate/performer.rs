@@ -1,4 +1,4 @@
-use crate::terminal::{Alert, Progress};
+use crate::terminal::{Alert, CommandBlockEvent, Progress};
 use crate::terminalstate::{
     default_color_map, CharSet, MouseEncoding, TabStop, UnicodeVersionStackEntry,
 };
@@ -111,6 +111,14 @@ impl<'a> Performer<'a> {
             }
         } else {
             g
+        }
+    }
+
+    fn emit_block_event(&mut self, event: CommandBlockEvent) {
+        let phys = self.screen.phys_row(self.cursor.y);
+        let stable_row = self.screen.phys_to_stable_row_index(phys);
+        if let Some(handler) = self.alert_handler.as_mut() {
+            handler.alert(Alert::CommandBlockEvent { event, stable_row });
         }
     }
 
@@ -868,17 +876,20 @@ impl<'a> Performer<'a> {
             ) => {
                 self.fresh_line();
                 self.pen.set_semantic_type(SemanticType::Prompt);
+                self.emit_block_event(CommandBlockEvent::PromptStart);
             }
             OperatingSystemCommand::FinalTermSemanticPrompt(
                 FinalTermSemanticPrompt::StartPrompt(_),
             ) => {
                 self.pen.set_semantic_type(SemanticType::Prompt);
+                self.emit_block_event(CommandBlockEvent::PromptStart);
             }
             OperatingSystemCommand::FinalTermSemanticPrompt(
                 FinalTermSemanticPrompt::MarkEndOfCommandWithFreshLine { .. },
             ) => {
                 self.fresh_line();
                 self.pen.set_semantic_type(SemanticType::Prompt);
+                self.emit_block_event(CommandBlockEvent::PromptStart);
             }
             OperatingSystemCommand::FinalTermSemanticPrompt(
                 FinalTermSemanticPrompt::MarkEndOfPromptAndStartOfInputUntilNextMarker { .. },
@@ -895,11 +906,14 @@ impl<'a> Performer<'a> {
                 FinalTermSemanticPrompt::MarkEndOfInputAndStartOfOutput { .. },
             ) => {
                 self.pen.set_semantic_type(SemanticType::Output);
+                self.emit_block_event(CommandBlockEvent::OutputStart);
             }
 
             OperatingSystemCommand::FinalTermSemanticPrompt(
-                FinalTermSemanticPrompt::CommandStatus { .. },
-            ) => {}
+                FinalTermSemanticPrompt::CommandStatus { status, .. },
+            ) => {
+                self.emit_block_event(CommandBlockEvent::CommandEnd { status });
+            }
 
             OperatingSystemCommand::SystemNotification(message) => {
                 if let Some(handler) = self.alert_handler.as_mut() {

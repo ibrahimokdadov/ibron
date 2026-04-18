@@ -42,6 +42,20 @@ pub enum Progress {
     Indeterminate,
 }
 
+/// Semantic-prompt milestone derived from OSC 133 A/C/D. Emitted via
+/// `Alert::CommandBlockEvent` so higher layers (e.g. ibron-blocks) can
+/// maintain a list of command blocks without polling.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[cfg_attr(feature = "use_serde", derive(Serialize, Deserialize))]
+pub enum CommandBlockEvent {
+    /// OSC 133;A — a new prompt is about to be drawn.
+    PromptStart,
+    /// OSC 133;C — user submitted the command; output begins.
+    OutputStart,
+    /// OSC 133;D;<status> — the most recent command finished.
+    CommandEnd { status: i32 },
+}
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[cfg_attr(feature = "use_serde", derive(Serialize, Deserialize))]
 pub enum Alert {
@@ -71,6 +85,12 @@ pub enum Alert {
     OutputSinceFocusLost,
     /// A change to the progress bar state
     Progress(Progress),
+    /// A semantic-prompt milestone from OSC 133. Fires on A, C, and D. See
+    /// `CommandBlockEvent` for the cases.
+    CommandBlockEvent {
+        event: CommandBlockEvent,
+        stable_row: StableRowIndex,
+    },
 }
 
 pub trait AlertHandler: Send + Sync {
