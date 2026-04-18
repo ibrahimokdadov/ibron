@@ -1,0 +1,12 @@
+[package]
+name = "ibron-blocks"
+version = "0.0.0"
+edition = "2021"
+license = "MIT"
+description = "ibron command-blocks layer: groups semantic zones into blocks, tracks exit codes, renders block chrome, implements block operations."
+repository = "https://github.com/ibrahimokdadov/ibron"
+publish = false
+
+[dependencies]
+
+[dev-dependencies]
