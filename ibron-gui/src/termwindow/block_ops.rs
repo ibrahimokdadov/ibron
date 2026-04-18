@@ -87,18 +87,128 @@ impl TermWindow {
             log::warn!("BlockCopyOutput: no block to copy");
             return;
         };
-        let Some(start) = block.output_start else {
-            log::warn!("BlockCopyOutput: block has no output yet");
-            return;
-        };
-        let end_inclusive = block.output_end.unwrap_or(start);
-        let text = extract_text(pane, start..end_inclusive + 1);
+        let text = extract_output_text(pane, &block);
         if text.is_empty() {
-            log::warn!("BlockCopyOutput: empty output text");
+            log::warn!("BlockCopyOutput: no output to copy");
             return;
         }
         self.copy_to_clipboard(ClipboardCopyDestination::Clipboard, text);
     }
+
+    pub(crate) fn block_toggle_fold(&mut self, pane: &Arc<dyn Pane>) {
+        let pane_id = pane.pane_id();
+        let Some(block) = self.focused_block_snapshot(pane_id) else {
+            log::warn!("BlockFold: no block in focus");
+            return;
+        };
+        let set = self.folded_blocks.entry(pane_id).or_default();
+        if !set.insert(block.id) {
+            set.remove(&block.id);
+        }
+        if let Some(w) = self.window.as_ref() {
+            w.invalidate();
+        }
+    }
+
+    pub(crate) fn block_toggle_bookmark(&mut self, pane: &Arc<dyn Pane>) {
+        let pane_id = pane.pane_id();
+        let Some(block) = self.focused_block_snapshot(pane_id) else {
+            log::warn!("BlockBookmark: no block in focus");
+            return;
+        };
+        let set = self.bookmarked_blocks.entry(pane_id).or_default();
+        if !set.insert(block.id) {
+            set.remove(&block.id);
+        }
+        if let Some(w) = self.window.as_ref() {
+            w.invalidate();
+        }
+    }
+
+    pub(crate) fn block_share(&self, pane: &Arc<dyn Pane>) {
+        let Some(block) = self.focused_block_snapshot(pane.pane_id()) else {
+            log::warn!("BlockShare: no block in focus");
+            return;
+        };
+        let md = format_block_as_markdown(pane, &block, None);
+        if md.is_empty() {
+            log::warn!("BlockShare: empty block");
+            return;
+        }
+        self.copy_to_clipboard(ClipboardCopyDestination::Clipboard, md);
+    }
+
+    pub(crate) fn block_ask_ai(&self, pane: &Arc<dyn Pane>) {
+        let Some(block) = self.focused_block_snapshot(pane.pane_id()) else {
+            log::warn!("BlockAskAI: no block in focus");
+            return;
+        };
+        let prefix = "Please explain or debug the following terminal command and its output:\n\n";
+        let md = format_block_as_markdown(pane, &block, Some(prefix));
+        self.copy_to_clipboard(ClipboardCopyDestination::Clipboard, md);
+    }
+
+    pub(crate) fn block_search_open(&self, pane: &Arc<dyn Pane>) {
+        let pane_id = pane.pane_id();
+        let Some(manager) = self.blocks.get(&pane_id) else {
+            log::warn!("BlockSearchOpen: no blocks in this pane");
+            return;
+        };
+        let mut out = String::from("# Command blocks\n\n");
+        for block in manager.all() {
+            let cmd = extract_command_text(pane, block);
+            let status = match block.exit_status {
+                Some(0) => "ok".to_string(),
+                Some(s) => format!("exit {s}"),
+                None => "running".to_string(),
+            };
+            out.push_str(&format!(
+                "- [{}] `{}`\n",
+                status,
+                cmd.lines().next().unwrap_or("")
+            ));
+        }
+        self.copy_to_clipboard(ClipboardCopyDestination::Clipboard, out);
+    }
+}
+
+fn extract_output_text(pane: &Arc<dyn Pane>, block: &Block) -> String {
+    let Some(start) = block.output_start else {
+        return String::new();
+    };
+    let end_inclusive = block.output_end.unwrap_or(start);
+    extract_text(pane, start..end_inclusive + 1)
+}
+
+fn format_block_as_markdown(pane: &Arc<dyn Pane>, block: &Block, prefix: Option<&str>) -> String {
+    let mut out = String::new();
+    if let Some(p) = prefix {
+        out.push_str(p);
+    }
+    let cmd = extract_command_text(pane, block);
+    if !cmd.is_empty() {
+        out.push_str("**Command:**\n\n```\n");
+        out.push_str(&cmd);
+        if !cmd.ends_with('\n') {
+            out.push('\n');
+        }
+        out.push_str("```\n\n");
+    }
+    let output = extract_output_text(pane, block);
+    if !output.is_empty() {
+        let status = match block.exit_status {
+            Some(0) => "Output (exit 0):".to_string(),
+            Some(s) => format!("Output (exit {s}):"),
+            None => "Output (still running):".to_string(),
+        };
+        out.push_str(&format!("**{status}**\n\n```\n"));
+        out.push_str(&output);
+        if !output.ends_with('\n') {
+            out.push('\n');
+        }
+        out.push_str("```\n");
+    }
+    out
 }
 
 fn extract_text(pane: &Arc<dyn Pane>, range: std::ops::Range<StableRowIndex>) -> String {

@@ -293,6 +293,8 @@ impl crate::TermWindow {
         // command block, colored by exit status (green=0, red=err,
         // yellow=running). The focused block gets a wider strip so
         // it's obvious which block BlockCopy*/Rerun will act on.
+        // Bookmarked blocks get an extra 2px outrigger to the right.
+        // Folded blocks are dimmed to 40% alpha.
         if let Some(blocks) = self.blocks.get(&pane_id) {
             let stable_range = match current_viewport {
                 Some(top) => top..top + dims.viewport_rows as StableRowIndex,
@@ -305,6 +307,9 @@ impl crate::TermWindow {
                 + (pos.left as f32 * cell_width);
             let narrow_w = 3.0_f32;
             let focused_w = 6.0_f32;
+            let bookmark_outrigger_w = 2.0_f32;
+            let bookmark_gap = 1.0_f32;
+            let dim_alpha = 0.4_f32;
             let green = palette.colors.0[2].to_linear();
             let red = palette.colors.0[1].to_linear();
             let yellow = palette.colors.0[3].to_linear();
@@ -313,6 +318,8 @@ impl crate::TermWindow {
                 .get(&pane_id)
                 .copied()
                 .or_else(|| blocks.latest().map(|b| b.id));
+            let folded = self.folded_blocks.get(&pane_id);
+            let bookmarked = self.bookmarked_blocks.get(&pane_id);
             let visible_blocks: Vec<_> = blocks
                 .iter_range(stable_range.start, stable_range.end)
                 .map(|b| (b.id, b.row_span(), b.exit_status))
@@ -325,10 +332,18 @@ impl crate::TermWindow {
                 }
                 let y_offset = (vis_start - stable_range.start) as f32 * cell_height;
                 let strip_h = (vis_end - vis_start) as f32 * cell_height;
-                let color = match exit_status {
+                let base = match exit_status {
                     Some(0) => green,
                     Some(_) => red,
                     None => yellow,
+                };
+                let is_folded = folded.map(|s| s.contains(&id)).unwrap_or(false);
+                let color = if is_folded {
+                    window::color::LinearRgba::with_components(
+                        base.0, base.1, base.2, base.3 * dim_alpha,
+                    )
+                } else {
+                    base
                 };
                 let gutter_w = if Some(id) == focused_id {
                     focused_w
@@ -342,6 +357,20 @@ impl crate::TermWindow {
                     color,
                 )
                 .context("block gutter filled_rectangle")?;
+                if bookmarked.map(|s| s.contains(&id)).unwrap_or(false) {
+                    self.filled_rectangle(
+                        layers,
+                        1,
+                        euclid::rect(
+                            gutter_x + gutter_w + bookmark_gap,
+                            top_pixel_y + y_offset,
+                            bookmark_outrigger_w,
+                            strip_h,
+                        ),
+                        color,
+                    )
+                    .context("block gutter bookmark outrigger")?;
+                }
             }
         }
 
