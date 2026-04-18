@@ -1,40 +1,46 @@
-# Wez's Terminal
+# ibron
 
-<img height="128" alt="WezTerm Icon" src="https://raw.githubusercontent.com/wezterm/wezterm/main/assets/icon/wezterm-icon.svg" align="left"> *A GPU-accelerated cross-platform terminal emulator and multiplexer written by <a href="https://github.com/wez">@wez</a> and implemented in <a href="https://www.rust-lang.org/">Rust</a>*
+A fork of [WezTerm](https://github.com/wezterm/wezterm) aimed at
+replacing Warp as a daily terminal on Windows. Adds Warp-style
+command blocks, AI error assistance, and a few UX affordances wezterm
+doesn't ship by default.
 
-User facing docs and guide at: https://wezterm.org/
+**Status:** Pre-alpha. The v0.1 line is command-blocks only.
 
-![Screenshot](docs/screenshots/two.png)
+## Why another terminal?
 
-*Screenshot of wezterm on macOS, running vim*
+Warp is excellent but buggy on Windows + PowerShell and charges a
+subscription. wezterm is rock-solid on Windows + PowerShell but
+lacks Warp's block-oriented UX. ibron picks up where wezterm left
+off and adds the pieces that make Warp feel modern.
 
-## Installation
+## Install
 
-https://wezterm.org/installation
+Not yet. v0.1 isn't released.
 
-## Getting help
+## Build from source
 
-This is a spare time project, so please bear with me.  There are a couple of channels for support:
+```sh
+git clone https://github.com/ibrahimokdadov/ibron
+cd ibron
+cargo build --release -p ibron-gui
+```
 
-* You can use the [GitHub issue tracker](https://github.com/wezterm/wezterm/issues) to see if someone else has a similar issue, or to file a new one.
-* Start or join a thread in our [GitHub Discussions](https://github.com/wezterm/wezterm/discussions); if you have general
-  questions or want to chat with other wezterm users, you're welcome here!
-* There is a [Matrix room via Element.io](https://app.element.io/#/room/#wezterm:matrix.org)
-  for (potentially!) real time discussions.
+Requires a recent Rust toolchain. See `UPSTREAM-README.md` for
+detailed build prerequisites — they are unchanged from wezterm.
 
-The GitHub Discussions and Element/Gitter rooms are better suited for questions
-than bug reports, but don't be afraid to use whichever you are most comfortable
-using and we'll work it out.
+## Relationship to wezterm
 
-## Supporting the Project
+ibron is a soft fork. Every upstream feature still works. Upstream
+commits are periodically merged in via `git fetch upstream`. See
+`NOTICE` for attribution; see `LICENSE.md` (MIT) for the license.
 
-If you use and like WezTerm, please consider sponsoring it: your support helps
-to cover the fees required to maintain the project and to validate the time
-spent working on it!
+## Roadmap
 
-[Read more about sponsoring](https://wezterm.org/sponsor.html).
+- **v0.1** — Command blocks
+- **v0.2** — AI error assistance
+- **v0.3** — Smart autocomplete
+- **v0.4** — Session / tab restore
+- **v0.5** — Sidebar with live CPU/memory and folder tree
 
-* [![Sponsor WezTerm](https://img.shields.io/github/sponsors/wez?label=Sponsor%20WezTerm&logo=github&style=for-the-badge)](https://github.com/sponsors/wez)
-* [Patreon](https://patreon.com/WezFurlong)
-* [Ko-Fi](https://ko-fi.com/wezfurlong)
-* [Liberapay](https://liberapay.com/wez)
+See `docs/superpowers/specs/` for design specs.
