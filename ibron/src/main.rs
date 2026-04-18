@@ -772,9 +772,9 @@ fn delegate_to_gui(saver: UmaskSaver) -> anyhow::Result<()> {
     drop(saver);
 
     let exe_name = if cfg!(windows) {
-        "wezterm-gui.exe"
+        "ibron-gui.exe"
     } else {
-        "wezterm-gui"
+        "ibron-gui"
     };
 
     let exe = std::env::current_exe()?

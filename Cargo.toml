@@ -11,7 +11,7 @@ members = [
   "wezterm-cell",
   "wezterm-escape-parser",
   "wezterm-dynamic",
-  "wezterm-gui",
+  "ibron-gui",
   "wezterm-mux-server",
   "wezterm-open-url",
   "wezterm-ssh",
