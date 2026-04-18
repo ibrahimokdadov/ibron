@@ -131,6 +131,26 @@ The win: Phase 3 shrinks from "build parser + state machine + renderer" to "walk
 
 Wezterm already ships `assets/shell-integration/`. Before writing Phase 2, survey those files and reuse where possible. The original plan's "write ibron.ps1 / .sh / .zsh / .fish from scratch" is likely overkill — we may only need to rebrand filenames and tweak a few prompt sequences.
 
+## Build environment caveat (Windows, 2026-04-18)
+
+`cargo check -p wezterm-gui` failed on this machine during the `openssl-sys` build step with:
+
+```
+Can't locate Locale/Maketext/Simple.pm in @INC
+```
+
+Root cause: `/usr/bin/perl` (MSYS, Perl 5.32.0 for x86_64-msys-thread-multi) is first in PATH and is missing the `Locale::Maketext::Simple` module. `openssl-sys`'s vendored build shells out to perl to run `./Configure`, which needs the module.
+
+This is NOT a regression caused by Phase 1 work. `cargo check -p ibron-blocks` (our new crate) compiles cleanly on its own. The failure occurs in an upstream dependency that vanilla wezterm would also hit in the same environment.
+
+**Fix options (for user):**
+
+1. **Install Strawberry Perl** (preferred on Windows). Download from strawberryperl.com, add its `perl\bin\perl.exe` to PATH before MSYS. This is the officially documented workaround for openssl-sys on Windows.
+2. **Set `OPENSSL_NO_VENDOR=1` env var** and install OpenSSL via vcpkg or similar so openssl-sys finds a prebuilt lib.
+3. **Accept that the build fails on this machine for now** and verify builds on CI or another box before Phase 1b ships.
+
+Do not attempt these fixes silently — ask the user which path they prefer.
+
 ## TODO entries for future phases
 
 - Phase 1b: apply all renames listed in "Window class / app ID references" and "Config path references" sections.
