@@ -8,5 +8,7 @@ repository = "https://github.com/ibrahimokdadov/ibron"
 publish = false
 
 [dependencies]
+wezterm-term.workspace = true
+serde = { workspace = true, features = ["derive"] }
 
 [dev-dependencies]
