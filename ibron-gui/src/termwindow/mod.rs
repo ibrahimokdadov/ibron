@@ -69,6 +69,7 @@ use wezterm_term::input::LastMouseClick;
 use wezterm_term::{Alert, Progress, StableRowIndex, TerminalConfiguration, TerminalSize};
 
 pub mod background;
+pub mod block_ops;
 pub mod box_model;
 pub mod charselect;
 pub mod clipboard;
@@ -407,6 +408,7 @@ pub struct TermWindow {
     pane_state: RefCell<HashMap<PaneId, PaneState>>,
     semantic_zones: HashMap<PaneId, SemanticZoneCache>,
     pub blocks: HashMap<PaneId, ibron_blocks::BlockManager>,
+    pub focused_block: HashMap<PaneId, ibron_blocks::BlockId>,
 
     window_background: Vec<LoadedBackgroundLayer>,
 
@@ -783,6 +785,7 @@ impl TermWindow {
             allow_images: AllowImage::Yes,
             semantic_zones: HashMap::new(),
             blocks: HashMap::new(),
+            focused_block: HashMap::new(),
             ui_items: vec![],
             dragging: None,
             last_ui_item: None,
@@ -2787,6 +2790,16 @@ impl TermWindow {
             ScrollToPrompt(n) => self.scroll_to_prompt(*n, pane)?,
             ScrollToTop => self.scroll_to_top(pane),
             ScrollToBottom => self.scroll_to_bottom(pane),
+            BlockFocusPrev => self.block_focus_step(pane, -1),
+            BlockFocusNext => self.block_focus_step(pane, 1),
+            BlockCopyCommand => self.block_copy_command(pane),
+            BlockCopyOutput => self.block_copy_output(pane),
+            BlockRerun => log::warn!("BlockRerun is not yet implemented"),
+            BlockFold => log::warn!("BlockFold is not yet implemented"),
+            BlockBookmark => log::warn!("BlockBookmark is not yet implemented"),
+            BlockShare => log::warn!("BlockShare is not yet implemented"),
+            BlockAskAI => log::warn!("BlockAskAI is not yet implemented"),
+            BlockSearchOpen => log::warn!("BlockSearchOpen is not yet implemented"),
             ShowTabNavigator => self.show_tab_navigator(),
             ShowDebugOverlay => self.show_debug_overlay(),
             ShowLauncher => self.show_launcher(),

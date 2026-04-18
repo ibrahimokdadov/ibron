@@ -571,6 +571,20 @@ pub enum KeyAssignment {
     ScrollToPrompt(isize),
     ScrollToTop,
     ScrollToBottom,
+
+    /// ibron command-block operations. These act on the currently focused
+    /// block within the active pane. Focus defaults to the most recent
+    /// block and can be cycled via BlockFocusPrev / BlockFocusNext.
+    BlockFocusPrev,
+    BlockFocusNext,
+    BlockCopyCommand,
+    BlockCopyOutput,
+    BlockRerun,
+    BlockFold,
+    BlockBookmark,
+    BlockShare,
+    BlockAskAI,
+    BlockSearchOpen,
     ShowTabNavigator,
     ShowDebugOverlay,
     HideApplication,
