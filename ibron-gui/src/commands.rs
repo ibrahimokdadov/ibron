@@ -1441,7 +1441,7 @@ pub fn derive_command_from_key_assignment(action: &KeyAssignment) -> Option<Comm
         BlockFocusPrev => CommandDef {
             brief: "Focus previous command block".into(),
             doc: "Move focus to the previous command block in the active pane".into(),
-            keys: vec![],
+            keys: vec![(Modifiers::ALT.union(Modifiers::SHIFT), "UpArrow".into())],
             args: &[ArgType::ActivePane],
             menubar: &["View", "Blocks"],
             icon: None,
@@ -1449,7 +1449,7 @@ pub fn derive_command_from_key_assignment(action: &KeyAssignment) -> Option<Comm
         BlockFocusNext => CommandDef {
             brief: "Focus next command block".into(),
             doc: "Move focus to the next command block in the active pane".into(),
-            keys: vec![],
+            keys: vec![(Modifiers::ALT.union(Modifiers::SHIFT), "DownArrow".into())],
             args: &[ArgType::ActivePane],
             menubar: &["View", "Blocks"],
             icon: None,
@@ -1457,7 +1457,7 @@ pub fn derive_command_from_key_assignment(action: &KeyAssignment) -> Option<Comm
         BlockCopyCommand => CommandDef {
             brief: "Copy command of focused block".into(),
             doc: "Copies the command line of the focused block to the clipboard".into(),
-            keys: vec![],
+            keys: vec![(Modifiers::CTRL.union(Modifiers::SHIFT), "j".into())],
             args: &[ArgType::ActivePane],
             menubar: &["Edit", "Blocks"],
             icon: Some("md_content_copy"),
@@ -1465,7 +1465,7 @@ pub fn derive_command_from_key_assignment(action: &KeyAssignment) -> Option<Comm
         BlockCopyOutput => CommandDef {
             brief: "Copy output of focused block".into(),
             doc: "Copies the output of the focused block to the clipboard".into(),
-            keys: vec![],
+            keys: vec![(Modifiers::CTRL.union(Modifiers::SHIFT), "k".into())],
             args: &[ArgType::ActivePane],
             menubar: &["Edit", "Blocks"],
             icon: Some("md_content_copy"),
@@ -2143,6 +2143,17 @@ fn compute_default_actions() -> Vec<KeyAssignment> {
         ScrollByPage(NotNan::new(1.0).unwrap()),
         ScrollToTop,
         ScrollToBottom,
+        // ----------------- View → Blocks (ibron)
+        BlockFocusPrev,
+        BlockFocusNext,
+        BlockCopyCommand,
+        BlockCopyOutput,
+        BlockRerun,
+        BlockFold,
+        BlockBookmark,
+        BlockShare,
+        BlockAskAI,
+        BlockSearchOpen,
         // ----------------- Window
         ToggleFullScreen,
         ToggleAlwaysOnTop,

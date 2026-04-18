@@ -291,7 +291,8 @@ impl crate::TermWindow {
 
         // ibron block gutter: paint a thin left-edge strip per visible
         // command block, colored by exit status (green=0, red=err,
-        // yellow=running).
+        // yellow=running). The focused block gets a wider strip so
+        // it's obvious which block BlockCopy*/Rerun will act on.
         if let Some(blocks) = self.blocks.get(&pane_id) {
             let stable_range = match current_viewport {
                 Some(top) => top..top + dims.viewport_rows as StableRowIndex,
@@ -302,15 +303,21 @@ impl crate::TermWindow {
             let gutter_x = padding_left
                 + border.left.get() as f32
                 + (pos.left as f32 * cell_width);
-            let gutter_w = 3.0_f32;
+            let narrow_w = 3.0_f32;
+            let focused_w = 6.0_f32;
             let green = palette.colors.0[2].to_linear();
             let red = palette.colors.0[1].to_linear();
             let yellow = palette.colors.0[3].to_linear();
+            let focused_id = self
+                .focused_block
+                .get(&pane_id)
+                .copied()
+                .or_else(|| blocks.latest().map(|b| b.id));
             let visible_blocks: Vec<_> = blocks
                 .iter_range(stable_range.start, stable_range.end)
-                .map(|b| (b.row_span(), b.exit_status))
+                .map(|b| (b.id, b.row_span(), b.exit_status))
                 .collect();
-            for ((start, end), exit_status) in visible_blocks {
+            for (id, (start, end), exit_status) in visible_blocks {
                 let vis_start = start.max(stable_range.start);
                 let vis_end = end.min(stable_range.end);
                 if vis_end <= vis_start {
@@ -322,6 +329,11 @@ impl crate::TermWindow {
                     Some(0) => green,
                     Some(_) => red,
                     None => yellow,
+                };
+                let gutter_w = if Some(id) == focused_id {
+                    focused_w
+                } else {
+                    narrow_w
                 };
                 self.filled_rectangle(
                     layers,
