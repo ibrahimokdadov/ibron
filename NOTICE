@@ -1,0 +1,9 @@
+ibron
+Copyright 2026 Ibrahim Mokdad
+
+This product is a fork of WezTerm (https://github.com/wezterm/wezterm),
+licensed under the MIT License. See the included LICENSE.md for the
+full license text.
+
+Upstream WezTerm copyright:
+  Copyright (c) 2018-Present Wez Furlong
