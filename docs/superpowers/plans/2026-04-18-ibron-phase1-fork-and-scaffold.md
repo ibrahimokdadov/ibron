@@ -48,17 +48,16 @@ git log upstream/main --oneline | head -1
 ```
 Expected: a commit hash + message. If no output, wait for the background fetch to finish and retry.
 
-- [ ] **Step 2: Save our spec commit hash**
+- [ ] **Step 2: Save our pre-merge commit hashes**
+
+There are one or more commits on `main` that don't exist in `upstream/main` (at minimum the design spec, possibly also this plan). Capture all of them in chronological order so we can cherry-pick them back.
 
 Run:
 ```bash
-git log --oneline main
+git log --reverse --format=%H main > /tmp/ibron-precommits.txt
+cat /tmp/ibron-precommits.txt
 ```
-Expected: one line showing the spec commit (it will be `a7de03a` or similar). Copy that hash into a shell variable:
-```bash
-SPEC_COMMIT=$(git rev-parse main)
-echo "Spec commit: $SPEC_COMMIT"
-```
+Expected: one hash per line, oldest first.
 
 - [ ] **Step 3: Reset our `main` branch to `upstream/main`**
 
@@ -68,13 +67,16 @@ git reset --hard upstream/main
 ```
 Expected: `HEAD is now at <upstream-hash> <upstream-msg>`. The working tree now looks like wezterm's.
 
-- [ ] **Step 4: Cherry-pick our spec commit on top**
+- [ ] **Step 4: Cherry-pick our pre-merge commits on top**
 
 Run:
 ```bash
-git cherry-pick $SPEC_COMMIT
+while IFS= read -r hash; do
+  git cherry-pick "$hash" || { echo "Conflict on $hash"; exit 1; }
+done < /tmp/ibron-precommits.txt
 ```
-Expected: `[main <new-hash>] docs: add v0.1 command-blocks design spec`. If it reports a conflict (unlikely, since we added a new subdirectory), resolve by keeping our version and running `git cherry-pick --continue`.
+
+Expected: one `[main ...]` line per commit. If a cherry-pick conflicts (unlikely — we only added new subdirectories under `docs/`), keep our version, `git cherry-pick --continue`, and let the loop resume.
 
 - [ ] **Step 5: Verify the tree**
 
