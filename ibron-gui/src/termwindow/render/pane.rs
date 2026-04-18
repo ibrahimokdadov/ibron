@@ -289,6 +289,50 @@ impl crate::TermWindow {
             .context("filled_rectangle")?;
         }
 
+        // ibron block gutter: paint a thin left-edge strip per visible
+        // command block, colored by exit status (green=0, red=err,
+        // yellow=running).
+        if let Some(blocks) = self.blocks.get(&pane_id) {
+            let stable_range = match current_viewport {
+                Some(top) => top..top + dims.viewport_rows as StableRowIndex,
+                None => {
+                    dims.physical_top..dims.physical_top + dims.viewport_rows as StableRowIndex
+                }
+            };
+            let gutter_x = padding_left
+                + border.left.get() as f32
+                + (pos.left as f32 * cell_width);
+            let gutter_w = 3.0_f32;
+            let green = palette.colors.0[2].to_linear();
+            let red = palette.colors.0[1].to_linear();
+            let yellow = palette.colors.0[3].to_linear();
+            let visible_blocks: Vec<_> = blocks
+                .iter_range(stable_range.start, stable_range.end)
+                .map(|b| (b.row_span(), b.exit_status))
+                .collect();
+            for ((start, end), exit_status) in visible_blocks {
+                let vis_start = start.max(stable_range.start);
+                let vis_end = end.min(stable_range.end);
+                if vis_end <= vis_start {
+                    continue;
+                }
+                let y_offset = (vis_start - stable_range.start) as f32 * cell_height;
+                let strip_h = (vis_end - vis_start) as f32 * cell_height;
+                let color = match exit_status {
+                    Some(0) => green,
+                    Some(_) => red,
+                    None => yellow,
+                };
+                self.filled_rectangle(
+                    layers,
+                    1,
+                    euclid::rect(gutter_x, top_pixel_y + y_offset, gutter_w, strip_h),
+                    color,
+                )
+                .context("block gutter filled_rectangle")?;
+            }
+        }
+
         let (selrange, rectangular) = {
             let sel = self.selection(pos.pane.pane_id());
             (sel.range.clone(), sel.rectangular)
