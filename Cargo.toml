@@ -6,7 +6,7 @@ members = [
   "sync-color-schemes",
   "crates/ibron-blocks",
   "deps/cairo",
-  "wezterm",
+  "ibron",
   "wezterm-blob-leases",
   "wezterm-cell",
   "wezterm-escape-parser",
