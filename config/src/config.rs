@@ -1012,9 +1012,13 @@ impl Config {
         // multiple.  In addition, it spawns a lot of subprocesses,
         // so we do this bit "by-hand"
 
-        let mut paths = vec![PathPossibility::optional(HOME_DIR.join(".wezterm.lua"))];
+        let mut paths = vec![
+            PathPossibility::optional(HOME_DIR.join(".ibron.lua")),
+            PathPossibility::optional(HOME_DIR.join(".wezterm.lua")),
+        ];
         for dir in CONFIG_DIRS.iter() {
-            paths.push(PathPossibility::optional(dir.join("wezterm.lua")))
+            paths.push(PathPossibility::optional(dir.join("ibron.lua")));
+            paths.push(PathPossibility::optional(dir.join("wezterm.lua")));
         }
 
         if cfg!(windows) {
@@ -1029,11 +1033,14 @@ impl Config {
             if let Ok(exe_name) = std::env::current_exe() {
                 if let Some(exe_dir) = exe_name.parent() {
                     paths.insert(0, PathPossibility::optional(exe_dir.join("wezterm.lua")));
+                    paths.insert(0, PathPossibility::optional(exe_dir.join("ibron.lua")));
                 }
             }
         }
-        if let Some(path) = std::env::var_os("WEZTERM_CONFIG_FILE") {
-            log::trace!("Note: WEZTERM_CONFIG_FILE is set in the environment");
+        if let Some(path) = std::env::var_os("IBRON_CONFIG_FILE")
+            .or_else(|| std::env::var_os("WEZTERM_CONFIG_FILE"))
+        {
+            log::trace!("Note: IBRON_CONFIG_FILE / WEZTERM_CONFIG_FILE is set in the environment");
             paths.insert(0, PathPossibility::required(path.into()));
         }
 
