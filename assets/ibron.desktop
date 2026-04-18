@@ -1,0 +1,11 @@
+[Desktop Entry]
+Name=ibron
+Comment=ibron Terminal Emulator
+Keywords=shell;prompt;command;commandline;cmd;
+Icon=com.ibrahimokdadov.ibron
+StartupWMClass=com.ibrahimokdadov.ibron
+TryExec=ibron
+Exec=ibron start --cwd .
+Type=Application
+Categories=System;TerminalEmulator;Utility;
+Terminal=false

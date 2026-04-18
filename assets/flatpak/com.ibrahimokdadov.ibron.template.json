@@ -1,15 +1,16 @@
 {
-    "app-id": "org.wezfurlong.wezterm",
+    "app-id": "com.ibrahimokdadov.ibron",
     "runtime": "org.freedesktop.Platform",
     "runtime-version": "23.08",
     "sdk": "org.freedesktop.Sdk",
     "sdk-extensions" : [
         "org.freedesktop.Sdk.Extension.rust-stable"
     ],
-    "command": "wezterm",
+    "command": "ibron",
     "finish-args": [
         "--share=ipc",
         "--filesystem=home:ro",
+        "--filesystem=xdg-config/ibron",
         "--filesystem=xdg-config/wezterm",
         "--socket=fallback-x11",
         "--socket=wayland",
@@ -20,27 +21,27 @@
     ],
     "modules": [
         {
-            "name": "wezterm",
+            "name": "ibron",
             "buildsystem": "simple",
             "build-options": {
                 "append-path" : "/usr/lib/sdk/rust-stable/bin",
                 "env": {
-                    "CARGO_HOME": "/run/build/wezterm/cargo"
+                    "CARGO_HOME": "/run/build/ibron/cargo"
                 }
             },
             "build-commands": [
                 "cargo --offline fetch --manifest-path Cargo.toml --verbose",
                 "cargo --offline build --release --verbose",
-                "install -Dm644 ./assets/icon/terminal.png /app/share/icons/hicolor/128x128/apps/org.wezfurlong.wezterm.png",
-                "install -Dm644 org.wezfurlong.wezterm.appdata.xml /app/share/metainfo/org.wezfurlong.wezterm.appdata.xml",
-                "install -Dm644 ./assets/wezterm.desktop /app/share/applications/org.wezfurlong.wezterm.desktop",
-                "install -Dm755 ./target/release/wezterm -t /app/bin/",
-                "install -Dm755 ./target/release/wezterm-gui -t /app/bin/",
-                "install -Dm755 ./target/release/wezterm-mux-server -t /app/bin/",
+                "install -Dm644 ./assets/icon/terminal.png /app/share/icons/hicolor/128x128/apps/com.ibrahimokdadov.ibron.png",
+                "install -Dm644 com.ibrahimokdadov.ibron.appdata.xml /app/share/metainfo/com.ibrahimokdadov.ibron.appdata.xml",
+                "install -Dm644 ./assets/ibron.desktop /app/share/applications/com.ibrahimokdadov.ibron.desktop",
+                "install -Dm755 ./target/release/ibron -t /app/bin/",
+                "install -Dm755 ./target/release/ibron-gui -t /app/bin/",
+                "install -Dm755 ./target/release/ibron-mux-server -t /app/bin/",
                 "install -Dm755 ./target/release/strip-ansi-escapes -t /app/bin/",
                 "install -Dm644 assets/shell-integration/* -t /app/extra/export/share/etc/profile.d",
-                "install -Dm644 assets/shell-completion/zsh /app/extra/export/share/zsh/site-functions/_wezterm",
-                "install -Dm644 assets/shell-completion/bash /app/extra/export/share/etc/bash_completion.d/wezterm"
+                "install -Dm644 assets/shell-completion/zsh /app/extra/export/share/zsh/site-functions/_ibron",
+                "install -Dm644 assets/shell-completion/bash /app/extra/export/share/etc/bash_completion.d/ibron"
               ],
             "sources": [
                 {
@@ -51,7 +52,7 @@
                 },
                 {
                   "type": "file",
-                  "path": "org.wezfurlong.wezterm.appdata.xml"
+                  "path": "com.ibrahimokdadov.ibron.appdata.xml"
                 },
                 "generated-sources.json"
             ]

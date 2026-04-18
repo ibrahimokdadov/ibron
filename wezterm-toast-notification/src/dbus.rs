@@ -106,7 +106,7 @@ async fn show_notif_impl(notif: ToastNotification) -> Result<(), Box<dyn std::er
         .notify(
             "ibron",
             0,
-            "com.github.ibrahimokdadov.ibron",
+            "com.ibrahimokdadov.ibron",
             &notif.title,
             &notif.message,
             if notif.url.is_some() {

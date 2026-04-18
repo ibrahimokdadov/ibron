@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component type="desktop-application">
+  <content_rating type="oars-1.0" />
+  <id>com.ibrahimokdadov.ibron</id>
+  <metadata_license>MIT</metadata_license>
+  <project_license>MIT</project_license>
+  <name>ibron</name>
+  <summary>GPU-accelerated terminal with command blocks</summary>
+  <description>
+    <p>
+      ibron is a soft fork of WezTerm with Warp-style command blocks and
+      additional UX refinements. All upstream features continue to work.
+    </p>
+
+    <p>
+      Configuration is expressed using Lua and many powerful functions are
+      provided to help you customize your terminal to your workflow.
+    </p>
+
+    <p>
+      Integrated ssh allows using multiple tabs and panes without requiring
+      tmux to be installed on the remote host, and remote multiplexer
+      support allows tmux+mosh style workflows without using tmux or mosh,
+      while providing a fully native GUI locally.
+    </p>
+  </description>
+
+  <launchable type="desktop-id">com.ibrahimokdadov.ibron.desktop</launchable>
+
+  <url type="homepage">https://github.com/ibrahimokdadov/ibron</url>
+  <url type="bugtracker">https://github.com/ibrahimokdadov/ibron/issues</url>
+
+  <developer_name>Ibrahim Okdadov</developer_name>
+
+  <releases>
+    <release version="@TAG_NAME@" date="@DATE@">
+      <description>
+        <p>
+          Pre-alpha release. See the repository changelog for details.
+        </p>
+      </description>
+    </release>
+  </releases>
+</component>
