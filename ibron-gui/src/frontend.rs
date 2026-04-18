@@ -147,6 +147,7 @@ impl GuiFrontEnd {
                         | Alert::WindowTitleChanged(_)
                         | Alert::TabTitleChanged(_)
                         | Alert::IconTitleChanged(_)
+                        | Alert::CommandBlockEvent { .. }
                         | Alert::SetUserVar { .. },
                 } => {}
                 MuxNotification::Empty => {

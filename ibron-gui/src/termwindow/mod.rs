@@ -406,6 +406,7 @@ pub struct TermWindow {
     tab_state: RefCell<HashMap<TabId, TabState>>,
     pane_state: RefCell<HashMap<PaneId, PaneState>>,
     semantic_zones: HashMap<PaneId, SemanticZoneCache>,
+    pub blocks: HashMap<PaneId, ibron_blocks::BlockManager>,
 
     window_background: Vec<LoadedBackgroundLayer>,
 
@@ -781,6 +782,7 @@ impl TermWindow {
             scheduled_animation: RefCell::new(None),
             allow_images: AllowImage::Yes,
             semantic_zones: HashMap::new(),
+            blocks: HashMap::new(),
             ui_items: vec![],
             dragging: None,
             last_ui_item: None,
@@ -1201,6 +1203,15 @@ impl TermWindow {
                 } => {
                     self.emit_user_var_event(pane_id, name, value);
                 }
+                MuxNotification::Alert {
+                    alert: Alert::CommandBlockEvent { event, stable_row },
+                    pane_id,
+                } => {
+                    self.blocks
+                        .entry(pane_id)
+                        .or_insert_with(ibron_blocks::BlockManager::new)
+                        .on_event(event, stable_row);
+                }
                 MuxNotification::WindowTitleChanged { .. }
                 | MuxNotification::Alert {
                     alert:
@@ -1462,6 +1473,7 @@ impl TermWindow {
                     | Alert::IconTitleChanged(_)
                     | Alert::Progress(_)
                     | Alert::SetUserVar { .. }
+                    | Alert::CommandBlockEvent { .. }
                     | Alert::Bell,
             }
             | MuxNotification::PaneFocused(pane_id)

@@ -2605,6 +2605,10 @@ dependencies = [
 [[package]]
 name = "ibron-blocks"
 version = "0.0.0"
+dependencies = [
+ "serde",
+ "wezterm-term",
+]
 
 [[package]]
 name = "ibron-gui"
@@ -2635,6 +2639,7 @@ dependencies = [
  "futures",
  "hdrhistogram",
  "http_req",
+ "ibron-blocks",
  "image",
  "k9",
  "lazy_static",

@@ -120,6 +120,7 @@ http_req = "0.11"
 human-sort = "0.2"
 humansize = "2.1"
 humantime = "2.1"
+ibron-blocks = { path = "crates/ibron-blocks" }
 image = "0.25"
 intrusive-collections = "0.9"
 k9 = "0.12.0"
